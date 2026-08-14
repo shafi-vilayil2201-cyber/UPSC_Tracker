@@ -914,9 +914,9 @@
       justify-content: space-between;
       gap: 20px;
 
-      /* Let the card size itself to its content — do NOT set a fixed height */
+      /* Prevent flexbox shrinking inside scrollable content container */
       height: auto;
-      min-height: 0;
+      flex-shrink: 0;
 
       padding: 26px 24px;
       border-radius: 24px;
@@ -926,7 +926,7 @@
       background: linear-gradient(135deg, #4a7a38 0%, #304D24 60%, #26401d 100%);
       box-shadow: 0 10px 24px rgba(48, 77, 36, 0.35), 0 2px 6px rgba(48, 77, 36, 0.25);
       position: relative;
-      overflow: hidden; /* only for the sheen pseudo-element below — safe now that height is auto */
+      overflow: hidden; /* only for the sheen pseudo-element below — safe now that height is auto and flex-shrink is 0 */
     }
 
     /* subtle glossy sheen across the top */
