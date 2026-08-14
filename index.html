@@ -910,11 +910,12 @@
     .hero-progress-card {
       background: linear-gradient(135deg, #5B8C3E 0%, #304D24 100%);
       border-radius: var(--radius-container);
-      padding: 20px;
+      padding: 20px 22px;
       color: var(--color-white);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
       margin-top: 14px;
       margin-bottom: 20px;
       box-shadow: 0 14px 36px rgba(48, 77, 36, 0.28);
@@ -925,7 +926,9 @@
     .hero-progress-left {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
+      min-width: 0;
+      flex: 1;
     }
 
     .hero-progress-label {
@@ -937,40 +940,34 @@
     }
 
     .hero-progress-metric {
-      font-size: 36px;
+      font-size: 34px;
       font-weight: 800;
-      line-height: 1.1;
+      line-height: 1.05;
       letter-spacing: -1px;
     }
 
-    .hero-progress-pct {
-      font-size: 16px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.9);
-      margin-left: 6px;
-    }
-
     .hero-progress-subtext {
-      font-size: 12px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.8);
-      margin-top: 4px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 2px;
     }
 
     /* SVG Progress Ring */
     .hero-ring-container {
-      width: 76px;
-      height: 76px;
+      width: 68px;
+      height: 68px;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     .hero-ring-svg {
-      width: 76px;
-      height: 76px;
+      width: 68px;
+      height: 68px;
       transform: rotate(-90deg);
     }
 
@@ -3045,11 +3042,8 @@
           <section class="hero-progress-card" onclick="goToScreen9()" style="cursor: pointer;" aria-label="Today's progress summary — tap to view full progress dashboard">
             <div class="hero-progress-left">
               <span class="hero-progress-label">TODAY'S PROGRESS</span>
-              <div>
-                <span class="hero-progress-metric" id="todayTaskRatio">6 / 10</span>
-                <span class="hero-progress-pct" id="todayTaskPct">(60%)</span>
-              </div>
-              <span class="hero-progress-subtext">3 hours completed</span>
+              <span class="hero-progress-metric" id="todayTaskRatio">6 / 10</span>
+              <span class="hero-progress-subtext" id="todayTaskPct">60% complete • 3 hours done</span>
             </div>
 
             <!-- SVG Circular Progress Ring -->
