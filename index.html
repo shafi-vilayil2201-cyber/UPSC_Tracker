@@ -1,0 +1,3800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPSC Tracker — Modern Study Planner</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans for modern, calm typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM TOKENS (Figma Spec)
+       ========================================================================== */
+    :root {
+      --bg-warm-cream: #E8F0E3; /* Soft Sage/Mint Green base background */
+      --bg-white-card: #FFFFFF; /* Clean white card layers */
+      --bg-glass-card: rgba(255, 255, 255, 0.75); /* Modern translucent glass card */
+      --bg-glass-card-hover: rgba(255, 255, 255, 0.92);
+      --bg-glass-selected: rgba(91, 140, 62, 0.94); /* Confident Green glass selected */
+      --bg-glass-dark-nav: rgba(28, 36, 30, 0.88); /* Dark glass floating nav bar */
+      
+      --glass-blur: blur(18px) saturate(180%);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.65);
+      --glass-border-selected: 1px solid rgba(255, 255, 255, 0.35);
+      --shadow-glass-card: 0 12px 32px rgba(28, 36, 30, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      --shadow-glass-selected: 0 14px 36px rgba(91, 140, 62, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      --shadow-floating-nav: 0 16px 40px rgba(0, 0, 0, 0.22);
+      
+      --color-forest-dark: #5B8C3E;
+      --color-forest-hover: #4B7632;
+      --color-dark-pill: #1C241E;
+      --color-coral-accent: #E07A5F;
+      --color-text-muted: #526359;
+      --color-text-subtle: #75857B;
+      --color-mint-light: #CFDEC9;
+      --color-mint-active: #5B8C3E;
+      --color-white: #FFFFFF;
+      --color-card-border: rgba(218, 230, 213, 0.8);
+      --color-btn-disabled: rgba(197, 214, 188, 0.7);
+      
+      --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius-container: 24px;
+      --radius-card: 20px;
+      --radius-inner: 14px;
+      --radius-pill: 9999px;
+      --safe-padding: 24px;
+    }
+
+    /* Reset & Outer Layout */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #121815;
+      color: var(--color-forest-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Prototype Header / Controls */
+    .prototype-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 16px;
+      color: #A0B2A6;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .prototype-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .screen-jump-select {
+      background: rgba(150, 196, 172, 0.18);
+      color: #FFFFFF;
+      border: 1px solid rgba(150, 196, 172, 0.35);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .screen-jump-select:hover {
+      background: rgba(150, 196, 172, 0.3);
+      border-color: rgba(150, 196, 172, 0.5);
+    }
+
+    .screen-jump-select option {
+      background: #1C2621;
+      color: #FFFFFF;
+      padding: 6px;
+    }
+
+    .frame-toggle-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #E0ECE5;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .frame-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Device Container (390 x 844 iPhone Frame) */
+    .device-viewport {
+      width: 100%;
+      max-width: 412px;
+      height: min(844px, calc(100vh - 36px));
+      min-height: 600px;
+      background-color: var(--bg-warm-cream);
+      border-radius: 40px;
+      box-shadow: 
+        0 0 0 10px #26332C,
+        0 0 0 12px #1C2621,
+        0 20px 50px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0 !important;
+      }
+      .prototype-bar {
+        border-radius: 0 !important;
+        margin-bottom: 0 !important;
+      }
+      .device-viewport {
+        width: 100vw !important;
+        height: calc(100vh - 50px) !important;
+        max-width: 100vw !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+    }
+
+    /* Responsive Mode class toggle */
+    .device-viewport.full-responsive {
+      width: 100%;
+      max-width: 520px;
+      height: min(844px, calc(100vh - 36px));
+      border-radius: 24px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Screen Slide Container */
+    .screen-container {
+      width: 100%;
+      height: 100%;
+      padding: 0 var(--safe-padding);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      background-color: var(--bg-warm-cream);
+    }
+
+    /* ==========================================================================
+       TOP BAR
+       ========================================================================== */
+    .top-bar {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      flex-shrink: 0;
+      z-index: 5;
+    }
+
+    /* Zeodx Wordmark & Logo */
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .brand-wordmark {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.4px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--color-text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+      transition: color 0.2s ease;
+    }
+
+    .back-btn:hover {
+      color: var(--color-forest-dark);
+    }
+
+    /* Onboarding Progress Indicator */
+    .progress-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .progress-segment {
+      width: 18px;
+      height: 4px;
+      border-radius: 99px;
+      background-color: var(--color-mint-light);
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .progress-segment.active {
+      background-color: var(--color-dark-pill);
+      opacity: 1;
+      width: 24px;
+    }
+
+    /* Soft Coral / Peach Goal Badge (Secondary Stat Accent) */
+    .goal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: rgba(224, 122, 95, 0.12);
+      color: var(--color-coral-accent);
+      border: 1px solid rgba(224, 122, 95, 0.28);
+      padding: 4px 11px;
+      border-radius: 99px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      width: fit-content;
+    }
+
+    /* ==========================================================================
+       SCREEN 1 CONTENT BODY
+       ========================================================================== */
+    .screen-view {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 0 var(--safe-padding);
+      background-color: var(--bg-warm-cream);
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      box-sizing: border-box;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    #screen1View { z-index: 1; transform: translateX(0); opacity: 1; pointer-events: auto; visibility: visible; }
+    #screen2View { z-index: 2; transform: translateX(100%); }
+    #screen3View { z-index: 3; transform: translateX(100%); }
+    #screen4View { z-index: 4; transform: translateX(100%); }
+    #screen5View { z-index: 5; transform: translateX(100%); }
+    #screen6View { z-index: 6; transform: translateX(100%); }
+    #screen7View { z-index: 7; transform: translateX(100%); }
+    #screen8View { z-index: 8; transform: translateX(100%); }
+    #screen9View { z-index: 9; transform: translateX(100%); }
+    #screen10View { z-index: 10; transform: translateX(100%); }
+    #screen11View { z-index: 11; transform: translateX(100%); }
+
+    /* ==========================================================================
+       SCREEN 11 SPECIFIC STYLES (Settings - Optimized & Scrollable)
+       ========================================================================== */
+    .settings-group-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      margin-top: 8px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-glass-card);
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      min-height: 50px;
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(218, 230, 213, 0.6);
+      transition: background 0.2s ease;
+      color: var(--color-forest-dark);
+      text-decoration: none;
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-row.tappable {
+      cursor: pointer;
+    }
+
+    .settings-row.tappable:hover {
+      background: rgba(91, 140, 62, 0.06);
+    }
+
+    .settings-row-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .settings-row-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-forest-dark);
+    }
+
+    .settings-row-label.danger-label {
+      color: #A85A48; /* Subdued terracotta red-brown */
+    }
+
+    .settings-row-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-row-value {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+
+    .settings-chevron {
+      color: var(--color-text-subtle);
+      opacity: 0.7;
+    }
+
+    /* Screen Slide Animations & Visibility Control */
+    .screen-view.slide-in {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      visibility: visible !important;
+    }
+
+    .screen-view.slide-left {
+      transform: translateX(-100%) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
+
+    /* ==========================================================================
+       SCREEN 10 SPECIFIC STYLES (Consistency Insight)
+       ========================================================================== */
+    .pace-comparison-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-container);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-glass-card);
+    }
+
+    .comparison-half {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .comparison-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--color-text-subtle);
+    }
+
+    .comparison-rate {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .comparison-projection {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+
+    .dotted-journey-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 6px 0;
+    }
+
+    .dotted-journey-line::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      border-top: 2px dashed rgba(91, 140, 62, 0.35);
+    }
+
+    .journey-node-dot {
+      position: relative;
+      z-index: 2;
+      background: var(--color-forest-dark);
+      color: #FFFFFF;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+    }
+
+    .reflection-inline-block {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 24px;
+      margin-bottom: 30px;
+    }
+
+    .reflection-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      text-align: center;
+    }
+
+    .reflection-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .reflection-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-subtle);
+    }
+
+    .reflection-metric {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+    }
+
+    .reflection-closing-note {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* ==========================================================================
+       SCREEN 9 SPECIFIC STYLES (Progress Dashboard - Spacious & Uncongested)
+       ========================================================================== */
+    .weekly-hero-card {
+      background: linear-gradient(145deg, #5B8C3E 0%, #2A4420 100%);
+      border-radius: var(--radius-container);
+      padding: 22px 20px;
+      color: var(--color-white);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 16px;
+      margin-bottom: 28px;
+      box-shadow: 0 16px 40px rgba(42, 68, 32, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .weekly-hero-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .weekly-hero-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .weekly-hero-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-top: 2px;
+    }
+
+    .weekly-hero-metric-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .weekly-hero-metric {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .weekly-hero-delta {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.18);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      margin-top: 4px;
+    }
+
+    /* 3 Mini Stat Pills */
+    .weekly-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: var(--radius-card);
+      padding: 10px;
+    }
+
+    .weekly-stat-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      text-align: center;
+    }
+
+    .pill-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .pill-value {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .bar-val {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 2px;
+    }
+
+    .weekly-bar-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 95px;
+      margin-top: 4px;
+    }
+
+    .weekly-bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .weekly-bar-track {
+      width: 14px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .weekly-bar-track.placeholder {
+      border: 1.5px dashed rgba(255, 255, 255, 0.35);
+      background: transparent;
+    }
+
+    .weekly-bar-fill {
+      width: 100%;
+      background: #FFFFFF;
+      border-radius: var(--radius-pill);
+      transition: height 0.5s ease-out;
+    }
+
+    .weekly-day-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Footer Note */
+    .weekly-hero-footer {
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-pill);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.95);
+      line-height: 1.35;
+    }
+
+    /* Subject Progress List */
+    .subject-progress-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 14px;
+      margin-bottom: 28px;
+    }
+
+    .subject-progress-row {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: var(--shadow-glass-card);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .subject-progress-row:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(28, 36, 30, 0.08);
+    }
+
+    .subject-row-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .subject-row-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+    }
+
+    .subject-row-pct {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+    }
+
+    .subject-row-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(207, 222, 201, 0.5);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+
+    .subject-row-fill {
+      height: 100%;
+      background: var(--color-forest-dark);
+      border-radius: var(--radius-pill);
+      transition: width 0.5s ease-out;
+    }
+
+    /* Overview 2-Up Cards & Stats */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+      margin-bottom: 14px;
+    }
+
+    .overview-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: var(--shadow-glass-card);
+    }
+
+    .overview-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--color-text-subtle);
+    }
+
+    .overview-card-metric {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .overview-sub-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .overview-sub-card {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(218, 230, 213, 0.5);
+      border-radius: var(--radius-card);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ==========================================================================
+       SCREEN 8 SPECIFIC STYLES (Task Detail)
+       ========================================================================== */
+    .task-context-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--color-text-subtle);
+    }
+
+    .task-subject-chip {
+      background-color: var(--color-forest-dark);
+      color: var(--color-white);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      width: fit-content;
+      margin-bottom: 8px;
+    }
+
+    .task-detail-duration {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--color-text-subtle);
+      margin-top: 4px;
+    }
+
+    .task-info-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-glass-card);
+    }
+
+    .task-description {
+      font-size: 14.5px;
+      font-weight: 500;
+      color: var(--color-forest-dark);
+      line-height: 1.5;
+    }
+
+    .task-status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(218, 230, 213, 0.6);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-text-subtle);
+      transition: background-color 0.3s ease;
+    }
+
+    .status-dot.completed {
+      background-color: var(--color-forest-dark);
+    }
+
+    .status-text {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--color-text-subtle);
+      transition: color 0.3s ease;
+    }
+
+    .status-text.completed {
+      color: var(--color-forest-dark);
+    }
+
+    /* Success Card (Post Completion) */
+    .task-success-card {
+      background: rgba(207, 222, 201, 0.45);
+      border: 1px solid rgba(91, 140, 62, 0.3);
+      border-radius: var(--radius-pill);
+      padding: 16px 20px;
+      text-align: center;
+      color: var(--color-forest-dark);
+      font-size: 14.5px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+      animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* ==========================================================================
+       SCREEN 7 SPECIFIC STYLES (Today - Daily Execution)
+       ========================================================================== */
+    .hero-progress-card {
+      background: linear-gradient(135deg, #5B8C3E 0%, #304D24 100%);
+      border-radius: var(--radius-container);
+      padding: 20px;
+      color: var(--color-white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 14px 36px rgba(48, 77, 36, 0.28);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-progress-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hero-progress-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .hero-progress-metric {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    .hero-progress-pct {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      margin-left: 6px;
+    }
+
+    .hero-progress-subtext {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 4px;
+    }
+
+    /* SVG Progress Ring */
+    .hero-ring-container {
+      width: 76px;
+      height: 76px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-ring-svg {
+      width: 76px;
+      height: 76px;
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.2);
+      stroke-width: 7;
+    }
+
+    .ring-fill {
+      fill: none;
+      stroke: #FFFFFF;
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 80;
+      transition: stroke-dashoffset 0.5s ease-out;
+    }
+
+    .ring-text {
+      position: absolute;
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    /* Today's Tasks Section */
+    .section-caps-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--color-forest-dark);
+      margin-bottom: 12px;
+    }
+
+    .task-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .task-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow-glass-card);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .task-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(28, 36, 30, 0.06);
+    }
+
+    .task-left-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .task-checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--color-forest-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+      background-color: transparent;
+    }
+
+    .task-checkbox svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--color-white);
+      stroke-width: 3;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s ease;
+    }
+
+    .task-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .task-subject {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.2px;
+      transition: all 0.2s ease;
+    }
+
+    .task-topic {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .task-duration {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-subtle);
+      background: rgba(207, 222, 201, 0.4);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      flex-shrink: 0;
+    }
+
+    /* Completed Task Styling */
+    .task-card.completed {
+      background: rgba(255, 255, 255, 0.5);
+      border-color: rgba(218, 230, 213, 0.4);
+      box-shadow: none;
+    }
+
+    .task-card.completed .task-checkbox {
+      background-color: var(--color-forest-dark);
+      border-color: var(--color-forest-dark);
+    }
+
+    .task-card.completed .task-checkbox svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .task-card.completed .task-subject {
+      color: var(--color-text-subtle);
+      text-decoration: line-through;
+    }
+
+    .task-card.completed .task-topic {
+      color: var(--color-text-subtle);
+      opacity: 0.7;
+    }
+
+    /* Today's Bottom Insight Block */
+    .today-insight-block {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 70px;
+    }
+
+    .today-insight-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+    }
+
+    .today-insight-subtext {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--color-text-subtle);
+    }
+
+    /* Water Floating Bottom Navigation Bar (Pure Icon Style) */
+    .water-nav-bar {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 320px;
+      height: 58px;
+      background: var(--bg-glass-dark-nav);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+      box-shadow: var(--shadow-floating-nav);
+      z-index: 100;
+    }
+
+    .water-tab-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.65);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: none;
+      background: transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .water-tab-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    .water-tab-btn:hover {
+      color: rgba(255, 255, 255, 0.95);
+      transform: translateY(-1.5px);
+    }
+
+    .water-tab-btn.active {
+      background-color: var(--color-white);
+      color: var(--color-dark-pill);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ==========================================================================
+       SCREEN 6 SPECIFIC STYLES (One-Year Planner - Non-wrapping & Spacious)
+       ========================================================================== */
+    .month-selector-group {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 10px;
+      height: 52px;
+      min-height: 52px;
+      box-sizing: border-box;
+      overflow-x: auto;
+      overflow-y: visible;
+      padding: 6px 4px;
+      margin-top: 16px;
+      margin-bottom: 24px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      position: relative;
+      z-index: 5;
+    }
+
+    .month-selector-group::-webkit-scrollbar {
+      display: none;
+    }
+
+    .month-pill {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-pill);
+      padding: 8px 18px;
+      height: 38px;
+      box-sizing: border-box;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(28, 36, 30, 0.04);
+    }
+
+    .month-pill:hover {
+      background: var(--bg-glass-card-hover);
+      transform: translateY(-1px);
+    }
+
+    .month-pill.selected {
+      background: var(--bg-glass-selected);
+      color: var(--color-white);
+      border: var(--glass-border-selected);
+      box-shadow: var(--shadow-glass-selected);
+    }
+
+    .secondary-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(26, 58, 42, 0.08);
+      border: 1px solid rgba(26, 58, 42, 0.16);
+      border-radius: var(--radius-pill);
+      padding: 10px 20px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      cursor: pointer;
+      margin-top: 14px;
+      margin-bottom: 4px;
+      width: fit-content;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .secondary-pill-btn:hover {
+      background: rgba(26, 58, 42, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .section-focus-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      margin-top: 24px;
+      margin-bottom: 16px;
+      letter-spacing: -0.2px;
+      display: block;
+      position: relative;
+      z-index: 1;
+      clear: both;
+    }
+
+    .subject-progress-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 14px;
+      margin-bottom: 24px;
+    }
+
+    .subject-progress-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: var(--shadow-glass-card);
+    }
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .subject-progress-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .subject-progress-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-glass-card);
+      transition: all 0.25s ease;
+    }
+
+    .subject-progress-card:hover {
+      background: var(--bg-glass-card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(28, 36, 30, 0.08);
+    }
+
+    .subject-progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .progress-subject-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.2px;
+    }
+
+    .progress-task-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      background: rgba(91, 140, 62, 0.12);
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+    }
+
+    .progress-topic-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 7px;
+      background-color: rgba(207, 222, 201, 0.6);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--color-forest-dark);
+      border-radius: var(--radius-pill);
+      transition: width 0.5s ease-out;
+    }
+
+    /* Annual Goal Reminder Card */
+    .annual-goal-card {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px dashed rgba(91, 140, 62, 0.35);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+
+    .annual-goal-heading {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+    }
+
+    .annual-goal-subtext {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-subtle);
+    }
+
+    .screen-view.slide-in {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      visibility: visible !important;
+    }
+
+    .screen-view.slide-left {
+      transform: translateX(-100%) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
+
+    /* ==========================================================================
+       SCREEN 5 SPECIFIC STYLES (Subject Selection Grid)
+       ========================================================================== */
+    .setup-tag-badge {
+      background-color: rgba(91, 140, 62, 0.12);
+      color: var(--color-forest-dark);
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .subject-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+      margin-bottom: 10px;
+    }
+
+    .subject-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      height: 92px;
+      cursor: pointer;
+      box-shadow: var(--shadow-glass-card);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .subject-card:hover {
+      background: var(--bg-glass-card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(28, 36, 30, 0.08);
+    }
+
+    .subject-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .subject-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: rgba(207, 222, 201, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-forest-dark);
+      transition: all 0.25s ease;
+    }
+
+    .subject-icon-box svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+    }
+
+    .subject-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: var(--color-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .subject-check svg {
+      width: 12px;
+      height: 12px;
+      stroke: var(--color-forest-dark);
+      stroke-width: 3;
+    }
+
+    .subject-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+      transition: color 0.25s ease;
+    }
+
+    /* Selected State for Subject Card */
+    .subject-card.selected {
+      background: var(--bg-glass-selected);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border-selected);
+      box-shadow: var(--shadow-glass-selected);
+    }
+
+    .subject-card.selected .subject-name {
+      color: var(--color-white);
+    }
+
+    .subject-card.selected .subject-icon-box {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: var(--color-white);
+    }
+
+    .subject-card.selected .subject-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Floating Summary Card */
+    .subject-summary-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 10px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      margin-top: 4px;
+      box-shadow: var(--shadow-glass-card);
+      transition: all 0.25s ease;
+    }
+
+    .subject-count-text {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+    }
+
+    .subject-reassurance {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--color-text-subtle);
+    }
+
+    /* ==========================================================================
+       SCREEN 4 SPECIFIC STYLES (Why Tracking Matters)
+       ========================================================================== */
+    .ripple-flow-chain {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .ripple-node {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-pill);
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: var(--color-forest-dark);
+      text-align: center;
+      width: 100%;
+      max-width: 270px;
+      box-shadow: 0 3px 10px rgba(28, 36, 30, 0.03);
+      transition: all 0.2s ease;
+    }
+
+    .ripple-node:nth-child(even) {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .ripple-connector {
+      width: 1.5px;
+      height: 5px;
+      background-color: var(--color-mint-light);
+    }
+
+    /* Sample Awareness Insight Card */
+    .awareness-insight-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+      box-shadow: var(--shadow-glass-card);
+    }
+
+    .awareness-question {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-forest-dark);
+      line-height: 1.38;
+    }
+
+    .task-stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 8px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: var(--radius-inner);
+      padding: 8px 12px;
+      border: 1px solid rgba(218, 230, 213, 0.7);
+    }
+
+    .task-stat-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .stat-val {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+    }
+
+    .progress-metric-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: var(--color-forest-dark);
+      color: var(--color-white);
+      padding: 5px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 14.5px;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(91, 140, 62, 0.25);
+    }
+
+    .awareness-reassurance {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--color-text-subtle);
+      line-height: 1.35;
+      text-align: center;
+    }
+
+    /* ==========================================================================
+       SCREEN 3 SPECIFIC STYLES (Study Hours & Compounding Proof)
+       ========================================================================== */
+    .eyebrow-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 2px;
+    }
+
+    .hour-selector-group {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px 2px;
+      margin-top: 14px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .hour-selector-group::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hour-pill {
+      background-color: var(--bg-white-card);
+      border: 1.5px solid var(--color-card-border);
+      border-radius: var(--radius-pill);
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .hour-pill:hover {
+      border-color: var(--color-mint-active);
+      transform: translateY(-1px);
+    }
+
+    .hour-pill.selected {
+      background-color: var(--color-forest-dark);
+      color: var(--color-white);
+      border-color: var(--color-forest-dark);
+      box-shadow: 0 4px 12px rgba(91, 140, 62, 0.25);
+    }
+
+    /* 2-Up Micro-Data Cards Grid */
+    .stat-grid-2up {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    /* Dynamic Calculation Hero Block (Glassmorphic Micro-Card) */
+    .calc-block {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      box-shadow: var(--shadow-glass-card);
+      transition: all 0.3s ease;
+    }
+
+    .calc-formula {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .calc-hero-metric {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.8px;
+      line-height: 1.15;
+      margin: 4px 0;
+      transition: transform 0.2s ease;
+    }
+
+    .calc-subtext {
+      font-size: 11.5px;
+      color: var(--color-text-muted);
+      font-weight: 400;
+      line-height: 1.3;
+    }
+
+    /* Insight Card ("75% Real World" Glass Micro-Card) */
+    .insight-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      box-shadow: var(--shadow-glass-card);
+    }
+
+    .insight-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--color-coral-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .insight-metric {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.8px;
+      line-height: 1.15;
+      margin: 4px 0;
+    }
+
+    .insight-reassurance {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--color-text-subtle);
+      line-height: 1.3;
+    }
+
+    /* Compounding Visual Divider */
+    .compounding-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      margin-bottom: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+    }
+
+    .compounding-line-divider {
+      flex: 1;
+      height: 1px;
+      background-color: var(--color-mint-light);
+    }
+
+
+
+    .content-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-top: 32px;
+      padding-bottom: 24px;
+      overflow-y: auto;
+      scrollbar-width: none; /* Hide scrollbar for Chrome/Firefox/Safari */
+    }
+
+    .content-body::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Headline Block */
+    .headline-block {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .main-headline {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      line-height: 1.22;
+      letter-spacing: -0.6px;
+    }
+
+    .supporting-text {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      line-height: 1.48;
+      max-width: 86%;
+    }
+
+    /* Center Illustration Block (Screen 1) */
+    .illustration-block {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 0;
+      position: relative;
+    }
+
+    .journey-svg {
+      width: 100%;
+      max-width: 320px;
+      height: 180px;
+      overflow: visible;
+    }
+
+    /* SVG Path Styling */
+    .path-bg {
+      fill: none;
+      stroke: var(--color-mint-light);
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+
+    .path-active {
+      fill: none;
+      stroke: var(--color-forest-dark);
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      animation: drawPath 1.8s ease-out forwards 0.3s;
+    }
+
+    @keyframes drawPath {
+      to {
+        stroke-dashoffset: 280;
+      }
+    }
+
+    /* Milestone Circles */
+    .milestone-node {
+      transition: all 0.3s ease;
+    }
+
+    .milestone-inactive {
+      fill: var(--bg-warm-cream);
+      stroke: var(--color-mint-active);
+      stroke-width: 2.5;
+    }
+
+    .milestone-active {
+      fill: var(--color-forest-dark);
+      stroke: var(--color-forest-dark);
+      stroke-width: 3;
+    }
+
+    .milestone-pulse {
+      fill: rgba(26, 58, 42, 0.12);
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        r: 15;
+        opacity: 0.4;
+      }
+      50% {
+        r: 20;
+        opacity: 0.8;
+      }
+    }
+
+    .today-badge {
+      font-size: 11px;
+      font-weight: 700;
+      fill: var(--color-forest-dark);
+      letter-spacing: 0.3px;
+    }
+
+    /* Secondary Message Block */
+    .secondary-block {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .secondary-tagline {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.2px;
+    }
+
+    .secondary-subtext {
+      font-size: 13.5px;
+      font-weight: 400;
+      color: var(--color-text-subtle);
+      line-height: 1.4;
+    }
+
+    /* ==========================================================================
+       SCREEN 2 SPECIFIC STYLES (Know the Aspirant)
+       ========================================================================== */
+    .question-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-forest-dark);
+      margin-top: 20px;
+      margin-bottom: 16px;
+      letter-spacing: -0.2px;
+    }
+
+    .cards-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Selection Card Styling (Glassmorphic Container) */
+    .option-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      cursor: pointer;
+      box-shadow: var(--shadow-glass-card);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-card:hover {
+      background: var(--bg-glass-card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(28, 36, 30, 0.08);
+    }
+
+    .card-left-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+    }
+
+    /* Icon Container */
+    .card-icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: rgba(213, 232, 222, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--color-forest-dark);
+      transition: all 0.25s ease;
+    }
+
+    .card-icon-box svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    .card-text-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-forest-dark);
+      letter-spacing: -0.2px;
+      line-height: 1.3;
+      transition: color 0.25s ease;
+    }
+
+    .card-subtext {
+      font-size: 12.5px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      line-height: 1.35;
+      transition: color 0.25s ease;
+    }
+
+    /* Checkmark Badge */
+    .card-checkmark {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: var(--color-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+    }
+
+    .card-checkmark svg {
+      width: 13px;
+      height: 13px;
+      stroke: var(--color-forest-dark);
+      stroke-width: 3;
+    }
+
+    /* Selected Card State (Glassmorphic Accent) */
+    .option-card.selected {
+      background: var(--bg-glass-selected);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border-selected);
+      box-shadow: var(--shadow-glass-selected);
+    }
+
+    .option-card.selected .card-title,
+    .option-card.selected .card-subtext {
+      color: var(--color-white);
+    }
+
+    .option-card.selected .card-subtext {
+      opacity: 0.88;
+    }
+
+    .option-card.selected .card-icon-box {
+      background-color: rgba(255, 255, 255, 0.18);
+      color: var(--color-white);
+    }
+
+    .option-card.selected .card-checkmark {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ==========================================================================
+       BOTTOM CTA BLOCK
+       ========================================================================== */
+    .cta-block {
+      padding-bottom: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+      background-color: var(--bg-warm-cream);
+      padding-top: 8px;
+    }
+
+    .primary-btn {
+      width: 100%;
+      height: 56px;
+      background-color: var(--color-forest-dark);
+      color: var(--color-white);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(26, 58, 42, 0.12);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      background-color: var(--color-forest-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(26, 58, 42, 0.18);
+    }
+
+    .primary-btn:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 2px 6px rgba(26, 58, 42, 0.12);
+    }
+
+    /* Disabled State for CTA */
+    .primary-btn:disabled {
+      background-color: var(--color-btn-disabled);
+      color: #8CA095;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .primary-btn:hover:not(:disabled) .btn-arrow {
+      transform: translateX(3px);
+    }
+
+    .reassurance-copy {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--color-text-subtle);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Prototype Header Controls -->
+  <div class="prototype-bar">
+    <div class="prototype-title">
+      <span>UPSC Tracker</span>
+      <select class="screen-jump-select" id="screenJumpSelect" onchange="showScreen(parseInt(this.value))" aria-label="Select Screen">
+        <option value="1">Screen 1 · Welcome</option>
+        <option value="2">Screen 2 · Know the Aspirant</option>
+        <option value="3">Screen 3 · Study Hours & Compounding</option>
+        <option value="4">Screen 4 · Why Tracking Matters</option>
+        <option value="5">Screen 5 · Subject Selection Grid</option>
+        <option value="6">Screen 6 · One-Year Planner</option>
+        <option value="7">Screen 7 · Today (Daily Execution)</option>
+        <option value="8">Screen 8 · Task Detail</option>
+        <option value="9">Screen 9 · Progress Dashboard</option>
+        <option value="10">Screen 10 · Consistency Insight</option>
+        <option value="11">Screen 11 · Settings</option>
+      </select>
+    </div>
+    <button class="frame-toggle-btn" id="frameToggleBtn" onclick="toggleViewportFrame()">
+      Toggle Frame
+    </button>
+  </div>
+
+  <!-- Mobile Device Viewport -->
+  <div class="device-viewport" id="deviceViewport">
+    <div class="screen-container">
+      
+      <!-- Single Global Water Floating Bottom Navigation Bar Sheet -->
+      <nav class="water-nav-bar" id="globalWaterNav" aria-label="App Navigation" style="display: none;">
+        <!-- 1. Daily -->
+        <button class="water-tab-btn" onclick="goToScreen7()" title="Daily Tasks">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </button>
+
+        <!-- 2. Subject Plan -->
+        <button class="water-tab-btn" onclick="goToScreen6()" title="Subject Plan">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </button>
+
+        <!-- 3. Dashboard -->
+        <button class="water-tab-btn" onclick="goToScreen9()" title="Progress Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </button>
+
+        <!-- 4. Settings -->
+        <button class="water-tab-btn" onclick="goToScreen11()" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </nav>
+
+      <!-- ==========================================================================
+           SCREEN 1 VIEW (Welcome)
+           ========================================================================== -->
+      <div class="screen-view" id="screen1View">
+        
+        <!-- Screen 1 Top Bar -->
+        <header class="top-bar">
+          <a href="#" class="brand-logo" aria-label="UPSC Tracker Home">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#1A3A2A" fill-opacity="0.2"/>
+              <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6ZM14.5 9.5L13 13L9.5 14.5L11 11L14.5 9.5Z" fill="#1A3A2A"/>
+            </svg>
+            <span class="brand-wordmark">UPSC Tracker</span>
+          </a>
+
+          <!-- Progress Indicator: Segment 1 filled -->
+          <div class="progress-indicator" aria-label="Onboarding step 1 of 4">
+            <div class="progress-segment active"></div>
+            <div class="progress-segment"></div>
+            <div class="progress-segment"></div>
+            <div class="progress-segment"></div>
+          </div>
+        </header>
+
+        <!-- Main Body Content -->
+        <main class="content-body">
+          <section class="headline-block">
+            <div class="goal-badge">Goal: UPSC CSE</div>
+            <h1 class="main-headline">Your UPSC preparation,<br>one day at a time.</h1>
+            <p class="supporting-text">You don't need to figure out the entire year today. You just need to know what to do next.</p>
+          </section>
+
+          <!-- SVG Illustration -->
+          <section class="illustration-block" aria-label="Journey roadmap illustration">
+            <svg class="journey-svg" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path class="path-bg" d="M 25,140 C 90,140 100,50 170,75 C 220,95 240,40 295,35" />
+              <path class="path-active" d="M 25,140 C 90,140 100,50 170,75 C 220,95 240,40 295,35" />
+
+              <circle class="milestone-pulse" cx="32" cy="140" r="16" />
+              <circle class="milestone-node milestone-active" cx="32" cy="140" r="7" />
+              <text x="32" y="172" text-anchor="middle" class="today-badge">TODAY</text>
+
+              <circle class="milestone-node milestone-inactive" cx="106" cy="100" r="5.5" />
+              <circle class="milestone-node milestone-inactive" cx="170" cy="75" r="5.5" />
+              <circle class="milestone-node milestone-inactive" cx="230" cy="65" r="5.5" />
+              <circle class="milestone-node milestone-inactive" cx="292" cy="35" r="6" stroke-width="2.8" />
+            </svg>
+          </section>
+
+          <section class="secondary-block">
+            <h2 class="secondary-tagline">Plan. Track. Keep moving.</h2>
+            <p class="secondary-subtext">A simple companion for your daily UPSC preparation.</p>
+          </section>
+        </main>
+
+        <!-- Bottom CTA -->
+        <footer class="cta-block">
+          <button class="primary-btn" id="startBtn" onclick="goToScreen2()">
+            <span>Let's get started</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+          <span class="reassurance-copy">No account required.</span>
+        </footer>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 2 VIEW (Know the Aspirant)
+           ========================================================================== -->
+      <div class="screen-view" id="screen2View">
+        
+        <!-- Screen 2 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen1()" aria-label="Go back to Screen 1">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <!-- Progress Indicator: Segment 1 & 2 filled -->
+          <div class="progress-indicator" aria-label="Onboarding step 2 of 4">
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+            <div class="progress-segment"></div>
+            <div class="progress-segment"></div>
+          </div>
+        </header>
+
+        <!-- Screen 2 Body Content -->
+        <main class="content-body">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <h1 class="main-headline">Let's understand your preparation.</h1>
+            <p class="supporting-text">Everyone prepares differently. Your plan doesn't have to look like someone else's.</p>
+          </section>
+
+          <!-- Question Label -->
+          <h2 class="question-label">Where are you in your UPSC journey?</h2>
+
+          <!-- 5 Vertical Selection Cards -->
+          <section class="cards-stack" role="radiogroup" aria-label="Where are you in your UPSC journey?">
+            
+            <!-- Card 1 -->
+            <div class="option-card" onclick="selectOption(this)" role="radio" aria-checked="false" tabindex="0">
+              <div class="card-left-group">
+                <div class="card-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                  </svg>
+                </div>
+                <div class="card-text-group">
+                  <span class="card-title">Just getting started</span>
+                  <span class="card-subtext">I'm figuring out where to begin.</span>
+                </div>
+              </div>
+              <div class="card-checkmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="option-card" onclick="selectOption(this)" role="radio" aria-checked="false" tabindex="0">
+              <div class="card-left-group">
+                <div class="card-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </div>
+                <div class="card-text-group">
+                  <span class="card-title">Building my routine</span>
+                  <span class="card-subtext">I know what to study, but consistency is difficult.</span>
+                </div>
+              </div>
+              <div class="card-checkmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="option-card" onclick="selectOption(this)" role="radio" aria-checked="false" tabindex="0">
+              <div class="card-left-group">
+                <div class="card-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="6"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                  </svg>
+                </div>
+                <div class="card-text-group">
+                  <span class="card-title">Preparing seriously</span>
+                  <span class="card-subtext">I'm already following a structured preparation.</span>
+                </div>
+              </div>
+              <div class="card-checkmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="option-card" onclick="selectOption(this)" role="radio" aria-checked="false" tabindex="0">
+              <div class="card-left-group">
+                <div class="card-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                </div>
+                <div class="card-text-group">
+                  <span class="card-title">Revision & tests</span>
+                  <span class="card-subtext">I'm revising and focusing on performance.</span>
+                </div>
+              </div>
+              <div class="card-checkmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="option-card" onclick="selectOption(this)" role="radio" aria-checked="false" tabindex="0">
+              <div class="card-left-group">
+                <div class="card-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                  </svg>
+                </div>
+                <div class="card-text-group">
+                  <span class="card-title">Getting back on track</span>
+                  <span class="card-subtext">I've lost momentum and want to restart.</span>
+                </div>
+              </div>
+              <div class="card-checkmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+
+          </section>
+
+        </main>
+
+        <!-- Bottom CTA -->
+        <footer class="cta-block">
+          <button class="primary-btn" id="continueBtn" disabled onclick="handleContinue()">
+            <span>Continue</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+          <span class="reassurance-copy">There is no right answer.</span>
+        </footer>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 3 VIEW (Study Hours & Compounding Proof)
+           ========================================================================== -->
+      <div class="screen-view" id="screen3View">
+        
+        <!-- Screen 3 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen2()" aria-label="Go back to Screen 2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <!-- Progress Indicator: Segment 1, 2, 3 filled -->
+          <div class="progress-indicator" aria-label="Onboarding step 3 of 4">
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+            <div class="progress-segment"></div>
+          </div>
+        </header>
+
+        <!-- Screen 3 Body Content -->
+        <main class="content-body">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <span class="eyebrow-label">Be realistic.</span>
+            <h1 class="main-headline" style="font-size: 25px;">How much can you actually study on a normal day?</h1>
+            <p class="supporting-text">Don't choose your ideal day. Choose the number you can realistically repeat.</p>
+          </section>
+
+          <!-- Hour Selector Group -->
+          <section class="hour-selector-group" role="radiogroup" aria-label="Select daily study hours">
+            <button class="hour-pill" onclick="selectHours(2, this)">2 hrs</button>
+            <button class="hour-pill" onclick="selectHours(3, this)">3 hrs</button>
+            <button class="hour-pill" onclick="selectHours(4, this)">4 hrs</button>
+            <button class="hour-pill selected" onclick="selectHours(5, this)">5 hrs</button>
+            <button class="hour-pill" onclick="selectHours(6, this)">6 hrs</button>
+            <button class="hour-pill" onclick="selectHours(7, this)">7+ hrs</button>
+          </section>
+
+          <!-- 2-Up Micro-Data Cards Grid (Theoretical Goal vs 75% Reality Check) -->
+          <div class="stat-grid-2up">
+            <!-- Card 1: Theoretical Goal -->
+            <section class="calc-block" aria-live="polite">
+              <span class="calc-formula" id="calcFormula">5 hrs × 365 days</span>
+              <span class="calc-hero-metric" id="heroMetric">1,825 hrs</span>
+              <span class="calc-subtext">Theoretical Goal</span>
+            </section>
+
+            <!-- Card 2: 75% Reality Check -->
+            <section class="insight-card" aria-live="polite">
+              <span class="insight-label">75% Real World</span>
+              <div class="insight-metric" id="realityMetric">≈ 1,369 hrs</div>
+              <span class="insight-reassurance">Solid Preparation</span>
+            </section>
+          </div>
+
+          <!-- Compounding Visual Divider -->
+          <div class="compounding-line">
+            <div class="compounding-line-divider"></div>
+            <span>Daily effort → Yearly compounding</span>
+            <div class="compounding-line-divider"></div>
+          </div>
+
+        </main>
+
+        <!-- Bottom CTA -->
+        <footer class="cta-block">
+          <button class="primary-btn" onclick="goToScreen4()">
+            <span>Show me what consistency can build</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </footer>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 4 VIEW (Why Tracking Matters)
+           ========================================================================== -->
+      <div class="screen-view" id="screen4View">
+        
+        <!-- Screen 4 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen3()" aria-label="Go back to Screen 3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <!-- Progress Indicator: All 4 segments filled (100% Onboarding Complete) -->
+          <div class="progress-indicator" aria-label="Onboarding step 4 of 4 complete">
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+          </div>
+        </header>
+
+        <!-- Screen 4 Body Content -->
+        <main class="content-body">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <span class="eyebrow-label">Why track your preparation?</span>
+            <h1 class="main-headline" style="font-size: 24px;">Tracking isn't about judging yourself.</h1>
+            <p class="supporting-text">It's about knowing what's actually happening.</p>
+          </section>
+
+          <!-- Ripple-Effect Visual Flow Chain -->
+          <section class="ripple-flow-chain" aria-label="Tracking ripple effect sequence">
+            <div class="ripple-node">TRACK</div>
+            <div class="ripple-connector"></div>
+            <div class="ripple-node">AWARENESS</div>
+            <div class="ripple-connector"></div>
+            <div class="ripple-node">CONSISTENCY</div>
+            <div class="ripple-connector"></div>
+            <div class="ripple-node">BETTER PLANNING</div>
+            <div class="ripple-connector"></div>
+            <div class="ripple-node">BETTER TIME MANAGEMENT</div>
+            <div class="ripple-connector"></div>
+            <div class="ripple-node">BETTER EXECUTION</div>
+            <div class="ripple-connector"></div>
+            <div class="ripple-node">LONG-TERM PROGRESS</div>
+          </section>
+
+          <!-- Conversational Insight Card -->
+          <section class="awareness-insight-card" aria-label="Daily tracking insight example">
+            <p class="awareness-question">"You studied for 5 hours. But how much did you actually complete?"</p>
+            
+            <div class="task-stats-row">
+              <div class="task-stat-col">
+                <span class="stat-label">Planned</span>
+                <span class="stat-val">10 tasks</span>
+              </div>
+              <div class="task-stat-col">
+                <span class="stat-label">Completed</span>
+                <span class="stat-val">8 tasks</span>
+              </div>
+              <div class="progress-metric-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>80%</span>
+              </div>
+            </div>
+
+            <p class="awareness-reassurance">Now you know what happened. Tomorrow, you can improve it.</p>
+          </section>
+
+        </main>
+
+        <!-- Bottom CTA -->
+        <footer class="cta-block">
+          <button class="primary-btn" onclick="goToScreen5()">
+            <span>Let's build my plan</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </footer>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 5 VIEW (Subject Selection Grid)
+           ========================================================================== -->
+      <div class="screen-view" id="screen5View">
+        
+        <!-- Screen 5 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen4()" aria-label="Go back to Screen 4">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <span class="setup-tag-badge">Setup Step</span>
+        </header>
+
+        <!-- Screen 5 Body Content -->
+        <main class="content-body" style="padding-top: 18px;">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <h1 class="main-headline">Let's build your plan.</h1>
+            <p class="supporting-text">Select the subjects you're currently preparing.</p>
+          </section>
+
+          <!-- 10 Subjects 2-Column Grid -->
+          <section class="subject-grid-2col" aria-label="Select subjects">
+            
+            <!-- Polity -->
+            <div class="subject-card selected" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Polity</span>
+            </div>
+
+            <!-- History -->
+            <div class="subject-card selected" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">History</span>
+            </div>
+
+            <!-- Geography -->
+            <div class="subject-card selected" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Geography</span>
+            </div>
+
+            <!-- Economy -->
+            <div class="subject-card selected" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Economy</span>
+            </div>
+
+            <!-- Environment -->
+            <div class="subject-card selected" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9a7 7 0 0 1-10 9z"/><path d="M11 20v-5"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Environment</span>
+            </div>
+
+            <!-- Science & Tech -->
+            <div class="subject-card selected" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Science & Tech</span>
+            </div>
+
+            <!-- Current Affairs -->
+            <div class="subject-card" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M9 12h6M9 16h4"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Current Affairs</span>
+            </div>
+
+            <!-- CSAT -->
+            <div class="subject-card" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="16" y1="18" x2="16" y2="18.01"/><line x1="12" y1="18" x2="12" y2="18.01"/><line x1="8" y1="18" x2="8" y2="18.01"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">CSAT</span>
+            </div>
+
+            <!-- Revision -->
+            <div class="subject-card" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Revision</span>
+            </div>
+
+            <!-- Mock Tests -->
+            <div class="subject-card" onclick="toggleSubjectSelection(this)">
+              <div class="subject-card-top">
+                <div class="subject-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div class="subject-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <span class="subject-name">Mock Tests</span>
+            </div>
+
+          </section>
+
+          <!-- Floating Summary Card -->
+          <section class="subject-summary-card" id="summaryCard">
+            <span class="subject-count-text" id="subjectCountText">6 subjects selected</span>
+            <span class="subject-reassurance">You can change this anytime.</span>
+          </section>
+
+        </main>
+
+        <!-- Bottom CTA Block -->
+        <footer class="cta-block" style="padding-bottom: 24px;">
+          <button class="primary-btn" id="createPlanBtn" onclick="goToScreen6()">
+            <span>Create My 1-Year Plan</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </footer>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 6 VIEW (One-Year Planner)
+           ========================================================================== -->
+      <div class="screen-view" id="screen6View">
+        
+        <!-- Screen 6 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen5()" aria-label="Go back to Screen 5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <a href="#" class="brand-logo" aria-label="UPSC Tracker Home">
+            <span class="brand-wordmark" style="font-size: 16px;">UPSC Tracker</span>
+          </a>
+
+          <button class="back-btn" aria-label="Profile and Settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </header>
+
+        <!-- Screen 6 Body Content -->
+        <main class="content-body" style="padding-top: 18px;">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <h1 class="main-headline">Your UPSC Plan</h1>
+            <p class="supporting-text">August 2026 — July 2027</p>
+          </section>
+
+          <!-- Go to Today's Tasks (New Shortcut CTA) -->
+          <button class="secondary-pill-btn" onclick="goToScreen7()" aria-label="Go to Today's Tasks">
+            <span>Go to Today's Tasks →</span>
+          </button>
+
+          <!-- Horizontal Month Selector -->
+          <section class="month-selector-group" role="radiogroup" aria-label="Select planning month">
+            <button class="month-pill selected" onclick="selectMonth('August', this)">August</button>
+            <button class="month-pill" onclick="selectMonth('September', this)">September</button>
+            <button class="month-pill" onclick="selectMonth('October', this)">October</button>
+            <button class="month-pill" onclick="selectMonth('November', this)">November</button>
+            <button class="month-pill" onclick="selectMonth('December', this)">December</button>
+            <button class="month-pill" onclick="selectMonth('January', this)">January</button>
+            <button class="month-pill" onclick="selectMonth('February', this)">February</button>
+            <button class="month-pill" onclick="selectMonth('March', this)">March</button>
+            <button class="month-pill" onclick="selectMonth('April', this)">April</button>
+            <button class="month-pill" onclick="selectMonth('May', this)">May</button>
+            <button class="month-pill" onclick="selectMonth('June', this)">June</button>
+            <button class="month-pill" onclick="selectMonth('July', this)">July</button>
+          </section>
+
+          <!-- Section Focus Title -->
+          <h2 class="section-focus-title" id="monthFocusTitle">August focus</h2>
+
+          <!-- Subject Progress Cards (4 total stack) -->
+          <section class="subject-progress-stack" aria-label="Subject progress breakdown">
+            
+            <!-- Card 1: Polity -->
+            <div class="subject-progress-card">
+              <div class="subject-progress-header">
+                <span class="progress-subject-title">Polity</span>
+                <span class="progress-task-count">7 / 12 tasks</span>
+              </div>
+              <span class="progress-topic-name">Fundamental Rights</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: 58%;"></div>
+              </div>
+            </div>
+
+            <!-- Card 2: History -->
+            <div class="subject-progress-card">
+              <div class="subject-progress-header">
+                <span class="progress-subject-title">History</span>
+                <span class="progress-task-count">8 / 16 tasks</span>
+              </div>
+              <span class="progress-topic-name">Modern India</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: 50%;"></div>
+              </div>
+            </div>
+
+            <!-- Card 3: Geography -->
+            <div class="subject-progress-card">
+              <div class="subject-progress-header">
+                <span class="progress-subject-title">Geography</span>
+                <span class="progress-task-count">5 / 10 tasks</span>
+              </div>
+              <span class="progress-topic-name">Physical Geography</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: 50%;"></div>
+              </div>
+            </div>
+
+            <!-- Card 4: Economy -->
+            <div class="subject-progress-card">
+              <div class="subject-progress-header">
+                <span class="progress-subject-title">Economy</span>
+                <span class="progress-task-count">4 / 8 tasks</span>
+              </div>
+              <span class="progress-topic-name">Inflation & Monetary Policy</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: 50%;"></div>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- Annual Goal Reminder Card (Closing Emotional Note) -->
+          <section class="annual-goal-card" style="margin-bottom: 90px;" aria-label="Annual goal resting thought">
+            <span class="annual-goal-heading">One year. One direction.</span>
+            <span class="annual-goal-subtext">Focus on this month. The rest will follow.</span>
+          </section>
+
+        </main>
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 7 VIEW (Today - Daily Execution)
+           ========================================================================== -->
+      <div class="screen-view" id="screen7View">
+        
+        <!-- Screen 7 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen6()" aria-label="Go back to Screen 6">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <a href="#" class="brand-logo" aria-label="UPSC Tracker Home">
+            <span class="brand-wordmark" style="font-size: 16px;">UPSC Tracker</span>
+          </a>
+
+          <button class="back-btn" aria-label="Profile and Settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </header>
+
+        <!-- Screen 7 Body Content -->
+        <main class="content-body" style="padding-top: 18px;">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <h1 class="main-headline">Good morning.</h1>
+            <p class="supporting-text" style="color: var(--color-forest-dark); font-weight: 600;">Tuesday, 11 August</p>
+            <p class="supporting-text" style="font-size: 13.5px; margin-top: -6px;">Let's focus on today.</p>
+          </section>
+
+          <!-- Today's Progress Card (Hero Centerpiece & Doorway to Screen 9 Progress Dashboard) -->
+          <section class="hero-progress-card" onclick="goToScreen9()" style="cursor: pointer;" aria-label="Today's progress summary — tap to view full progress dashboard">
+            <div class="hero-progress-left">
+              <span class="hero-progress-label">TODAY'S PROGRESS</span>
+              <div>
+                <span class="hero-progress-metric" id="todayTaskRatio">6 / 10</span>
+                <span class="hero-progress-pct" id="todayTaskPct">(60%)</span>
+              </div>
+              <span class="hero-progress-subtext">3 hours completed</span>
+            </div>
+
+            <!-- SVG Circular Progress Ring -->
+            <div class="hero-ring-container">
+              <svg class="hero-ring-svg" viewBox="0 0 76 76">
+                <circle class="ring-bg" cx="38" cy="38" r="30" />
+                <circle class="ring-fill" id="todayRingFill" cx="38" cy="38" r="30" style="stroke-dashoffset: 75;" />
+              </svg>
+              <span class="ring-text" id="todayRingText">60%</span>
+            </div>
+          </section>
+
+          <!-- Today's Plan Section -->
+          <h2 class="section-caps-title">TODAY'S PLAN</h2>
+
+          <!-- 5 Task Cards (Vertical Stack with Checkboxes & Task Detail Link) -->
+          <section class="task-stack" aria-label="Today's task list">
+            
+            <!-- Task 1: Polity (Completed) -->
+            <div class="task-card completed" onclick="openTaskDetail('Polity', 'Fundamental Rights — Article 12–18', '30 min', true, this)">
+              <div class="task-left-group">
+                <div class="task-checkbox" onclick="event.stopPropagation(); toggleTaskCompletion(this.closest('.task-card'));">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="task-info">
+                  <span class="task-subject">Polity</span>
+                  <span class="task-topic">Fundamental Rights</span>
+                </div>
+              </div>
+              <span class="task-duration">30 min</span>
+            </div>
+
+            <!-- Task 2: Economy (Uncompleted) -->
+            <div class="task-card" onclick="openTaskDetail('Economy', 'Inflation & Monetary Policy', '30 min', false, this)">
+              <div class="task-left-group">
+                <div class="task-checkbox" onclick="event.stopPropagation(); toggleTaskCompletion(this.closest('.task-card'));">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="task-info">
+                  <span class="task-subject">Economy</span>
+                  <span class="task-topic">Inflation</span>
+                </div>
+              </div>
+              <span class="task-duration">30 min</span>
+            </div>
+
+            <!-- Task 3: History (Completed) -->
+            <div class="task-card completed" onclick="openTaskDetail('History', 'Modern India — Freedom Movement', '30 min', true, this)">
+              <div class="task-left-group">
+                <div class="task-checkbox" onclick="event.stopPropagation(); toggleTaskCompletion(this.closest('.task-card'));">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="task-info">
+                  <span class="task-subject">History</span>
+                  <span class="task-topic">Modern India</span>
+                </div>
+              </div>
+              <span class="task-duration">30 min</span>
+            </div>
+
+            <!-- Task 4: Geography (Uncompleted) -->
+            <div class="task-card" onclick="openTaskDetail('Geography', 'Indian Rivers & Drainage Systems', '30 min', false, this)">
+              <div class="task-left-group">
+                <div class="task-checkbox" onclick="event.stopPropagation(); toggleTaskCompletion(this.closest('.task-card'));">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="task-info">
+                  <span class="task-subject">Geography</span>
+                  <span class="task-topic">Indian Rivers</span>
+                </div>
+              </div>
+              <span class="task-duration">30 min</span>
+            </div>
+
+            <!-- Task 5: Environment (Uncompleted) -->
+            <div class="task-card" onclick="openTaskDetail('Environment', 'Biodiversity & Conservation', '30 min', false, this)">
+              <div class="task-left-group">
+                <div class="task-checkbox" onclick="event.stopPropagation(); toggleTaskCompletion(this.closest('.task-card'));">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="task-info">
+                  <span class="task-subject">Environment</span>
+                  <span class="task-topic">Biodiversity</span>
+                </div>
+              </div>
+              <span class="task-duration">30 min</span>
+            </div>
+
+          </section>
+
+          <!-- Bottom Insight Block -->
+          <section class="today-insight-block">
+            <span class="today-insight-title" id="todayInsightTitle">4 tasks left today.</span>
+            <span class="today-insight-subtext">Keep going. You're building the habit.</span>
+          </section>
+
+        </main>
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 8 VIEW (Task Detail)
+           ========================================================================== -->
+      <div class="screen-view" id="screen8View">
+        
+        <!-- Screen 8 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen7()" aria-label="Go back to Screen 7">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <span class="task-context-label">Task</span>
+        </header>
+
+        <!-- Screen 8 Body Content -->
+        <main class="content-body" style="padding-top: 20px;">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <span class="task-subject-chip" id="taskDetailChip">POLITY</span>
+            <h1 class="main-headline" id="taskDetailTitle" style="font-size: 23px;">Fundamental Rights — Article 12–18</h1>
+            <p class="task-detail-duration" id="taskDetailDuration">30 min</p>
+          </section>
+
+          <!-- Information Card -->
+          <section class="task-info-card" aria-label="Task description">
+            <p class="task-description" id="taskDetailDescription">Read and revise the constitutional provisions related to Fundamental Rights.</p>
+            
+            <div class="task-status-row">
+              <div class="status-dot" id="taskStatusDot"></div>
+              <span class="status-text" id="taskStatusText">Not started</span>
+            </div>
+          </section>
+
+          <!-- Primary Action Button -->
+          <button class="primary-btn" id="taskDetailBtn" onclick="completeTaskDetail()">
+            <span>Mark as Complete</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+
+          <!-- Post-Interaction Success Card -->
+          <div class="task-success-card" id="taskSuccessCard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Done. One more step forward.</span>
+          </div>
+
+        </main>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 9 VIEW (Progress Dashboard)
+           ========================================================================== -->
+      <div class="screen-view" id="screen9View">
+        
+        <!-- Screen 9 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen7()" aria-label="Go back to Screen 7">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+        </header>
+
+        <!-- Screen 9 Body Content -->
+        <main class="content-body" style="padding-top: 10px;">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <h1 class="main-headline">Your Progress</h1>
+            <p class="supporting-text">See what your consistency is building.</p>
+          </section>
+
+          <!-- Expanded Weekly Consistency Hero Card (Tappable to view Consistency Insight Screen 10) -->
+          <section class="weekly-hero-card" onclick="goToScreen10()" style="cursor: pointer;" aria-label="Weekly consistency summary — tap to view full consistency insight">
+            
+            <!-- Top Header Row -->
+            <div class="weekly-hero-header">
+              <div>
+                <span class="weekly-hero-badge">THIS WEEK</span>
+                <h2 class="weekly-hero-title">Weekly Consistency</h2>
+              </div>
+              <div class="weekly-hero-metric-box">
+                <span class="weekly-hero-metric">62%</span>
+                <span class="weekly-hero-delta">↑ +8% vs last week</span>
+              </div>
+            </div>
+
+            <!-- 3 Mini Summary Stat Pills -->
+            <div class="weekly-stats-row">
+              <div class="weekly-stat-pill">
+                <span class="pill-label">Active Days</span>
+                <span class="pill-value">6 / 7 Days</span>
+              </div>
+              <div class="weekly-stat-pill">
+                <span class="pill-label">Study Time</span>
+                <span class="pill-value">14.5 Hours</span>
+              </div>
+              <div class="weekly-stat-pill">
+                <span class="pill-label">Completed</span>
+                <span class="pill-value">22 Tasks</span>
+              </div>
+            </div>
+
+            <!-- 7-Day Vertical Bar Chart with Values -->
+            <div class="weekly-bar-chart">
+              <div class="weekly-bar-col">
+                <span class="bar-val">70%</span>
+                <div class="weekly-bar-track"><div class="weekly-bar-fill" style="height: 70%;"></div></div>
+                <span class="weekly-day-label">MON</span>
+              </div>
+              <div class="weekly-bar-col">
+                <span class="bar-val">60%</span>
+                <div class="weekly-bar-track"><div class="weekly-bar-fill" style="height: 60%;"></div></div>
+                <span class="weekly-day-label">TUE</span>
+              </div>
+              <div class="weekly-bar-col">
+                <span class="bar-val">80%</span>
+                <div class="weekly-bar-track"><div class="weekly-bar-fill" style="height: 80%;"></div></div>
+                <span class="weekly-day-label">WED</span>
+              </div>
+              <div class="weekly-bar-col">
+                <span class="bar-val">50%</span>
+                <div class="weekly-bar-track"><div class="weekly-bar-fill" style="height: 50%;"></div></div>
+                <span class="weekly-day-label">THU</span>
+              </div>
+              <div class="weekly-bar-col">
+                <span class="bar-val" style="font-weight: 800; color: #E8F0E3;">90%</span>
+                <div class="weekly-bar-track"><div class="weekly-bar-fill" style="height: 90%; background: #E8F0E3;"></div></div>
+                <span class="weekly-day-label" style="font-weight: 800; color: #E8F0E3;">FRI</span>
+              </div>
+              <div class="weekly-bar-col">
+                <span class="bar-val">40%</span>
+                <div class="weekly-bar-track"><div class="weekly-bar-fill" style="height: 40%;"></div></div>
+                <span class="weekly-day-label">SAT</span>
+              </div>
+              <div class="weekly-bar-col">
+                <span class="bar-val" style="opacity: 0.5;">--</span>
+                <div class="weekly-bar-track placeholder"></div>
+                <span class="weekly-day-label" style="opacity: 0.6;">SUN</span>
+              </div>
+            </div>
+
+            <!-- Last Week Summary Highlight Note -->
+            <div class="weekly-hero-footer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>Last week peak: 90% completion on Friday (Polity & History revision completed).</span>
+            </div>
+
+          </section>
+
+          <!-- Subject Progress Section -->
+          <h2 class="section-caps-title">SUBJECT PROGRESS</h2>
+
+          <section class="subject-progress-list" aria-label="Subject progress bars">
+            <!-- Polity 72% -->
+            <div class="subject-progress-row">
+              <div class="subject-row-header">
+                <span class="subject-row-title">Polity</span>
+                <span class="subject-row-pct">72%</span>
+              </div>
+              <div class="subject-row-track"><div class="subject-row-fill" style="width: 72%;"></div></div>
+            </div>
+
+            <!-- Geography 64% -->
+            <div class="subject-progress-row">
+              <div class="subject-row-header">
+                <span class="subject-row-title">Geography</span>
+                <span class="subject-row-pct">64%</span>
+              </div>
+              <div class="subject-row-track"><div class="subject-row-fill" style="width: 64%;"></div></div>
+            </div>
+
+            <!-- History 58% -->
+            <div class="subject-progress-row">
+              <div class="subject-row-header">
+                <span class="subject-row-title">History</span>
+                <span class="subject-row-pct">58%</span>
+              </div>
+              <div class="subject-row-track"><div class="subject-row-fill" style="width: 58%;"></div></div>
+            </div>
+
+            <!-- CSAT 52% -->
+            <div class="subject-progress-row">
+              <div class="subject-row-header">
+                <span class="subject-row-title">CSAT</span>
+                <span class="subject-row-pct">52%</span>
+              </div>
+              <div class="subject-row-track"><div class="subject-row-fill" style="width: 52%;"></div></div>
+            </div>
+
+            <!-- Economy 45% -->
+            <div class="subject-progress-row">
+              <div class="subject-row-header">
+                <span class="subject-row-title">Economy</span>
+                <span class="subject-row-pct">45%</span>
+              </div>
+              <div class="subject-row-track"><div class="subject-row-fill" style="width: 45%;"></div></div>
+            </div>
+
+            <!-- Environment 31% -->
+            <div class="subject-progress-row">
+              <div class="subject-row-header">
+                <span class="subject-row-title">Environment</span>
+                <span class="subject-row-pct">31%</span>
+              </div>
+              <div class="subject-row-track"><div class="subject-row-fill" style="width: 31%;"></div></div>
+            </div>
+          </section>
+
+          <!-- Preparation Overview Section -->
+          <h2 class="section-caps-title">PREPARATION OVERVIEW</h2>
+
+          <!-- 2-Up Equal Width Cards -->
+          <div class="overview-grid">
+            <div class="overview-card">
+              <span class="overview-card-label">Tasks completed</span>
+              <span class="overview-card-metric">128 / 240</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-card-label">Study time</span>
+              <span class="overview-card-metric">64 hours</span>
+            </div>
+          </div>
+
+          <!-- 2 Sub Stats Inline Row -->
+          <div class="overview-sub-row">
+            <div class="overview-sub-card">
+              <span class="overview-card-label">Days tracked</span>
+              <span class="overview-card-metric" style="font-size: 20px;">42</span>
+            </div>
+            <div class="overview-sub-card">
+              <span class="overview-card-label">Current consistency</span>
+              <span class="overview-card-metric" style="font-size: 20px;">76%</span>
+            </div>
+          </div>
+
+          <!-- Emotional Insight Card -->
+          <section class="annual-goal-card" onclick="goToScreen10()" style="margin-bottom: 75px; cursor: pointer;">
+            <span class="annual-goal-heading">42 days tracked.</span>
+            <span class="annual-goal-subtext">You're building something that compounds. Tap to view full insight →</span>
+          </section>
+
+        </main>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 10 VIEW (Consistency Insight)
+           ========================================================================== -->
+      <div class="screen-view" id="screen10View">
+        
+        <!-- Screen 10 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen9()" aria-label="Go back to Screen 9">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+        </header>
+
+        <!-- Screen 10 Body Content -->
+        <main class="content-body" style="padding-top: 14px;">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <h1 class="main-headline" style="font-size: 26px;">Your consistency tells a story.</h1>
+            <p class="supporting-text" style="width: 88%; line-height: 1.45;">The goal isn't to have a perfect day. It's to keep returning.</p>
+          </section>
+
+          <!-- Comparison Card (Plan vs. Pace) -->
+          <section class="pace-comparison-card" aria-label="Plan versus actual pace comparison">
+            
+            <!-- Half 1: Your Plan -->
+            <div class="comparison-half">
+              <span class="comparison-label">YOUR PLAN</span>
+              <span class="comparison-rate">5 hrs/day</span>
+              <span class="comparison-projection">1,825 possible hours/year</span>
+            </div>
+
+            <!-- Gentle Dotted Journey Line -->
+            <div class="dotted-journey-line">
+              <span class="journey-node-dot">Consistency Journey</span>
+            </div>
+
+            <!-- Half 2: Your Current Pace -->
+            <div class="comparison-half">
+              <span class="comparison-label">YOUR CURRENT PACE</span>
+              <span class="comparison-rate">4.2 hrs/day</span>
+              <span class="comparison-projection">≈ 1,533 projected hours/year</span>
+            </div>
+
+          </section>
+
+          <!-- Reassurance Card -->
+          <section class="annual-goal-card" style="margin-bottom: 24px;">
+            <span class="annual-goal-heading">That's still a serious amount of preparation.</span>
+            <span class="annual-goal-subtext">Small improvements in your daily execution can compound over months.</span>
+          </section>
+
+          <!-- Personal Reflection Block (Inline Stats) -->
+          <section class="reflection-inline-block" aria-label="Personal daily reflection stats">
+            <div class="reflection-stats-row">
+              <div class="reflection-stat-item">
+                <span class="reflection-label">Planned tasks</span>
+                <span class="reflection-metric">10</span>
+              </div>
+              <div class="reflection-stat-item">
+                <span class="reflection-label">Completed</span>
+                <span class="reflection-metric">8</span>
+              </div>
+              <div class="reflection-stat-item">
+                <span class="reflection-label">Daily execution</span>
+                <span class="reflection-metric">80%</span>
+              </div>
+            </div>
+
+            <p class="reflection-closing-note">Tomorrow is another opportunity to improve.</p>
+          </section>
+
+        </main>
+
+      </div>
+
+
+      <!-- ==========================================================================
+           SCREEN 11 VIEW (Settings)
+           ========================================================================== -->
+      <div class="screen-view" id="screen11View">
+        
+        <!-- Screen 11 Top Bar -->
+        <header class="top-bar">
+          <button class="back-btn" onclick="goToScreen7()" aria-label="Go back to Screen 7 (Today)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+        </header>
+
+        <!-- Screen 11 Body Content -->
+        <main class="content-body" style="padding-top: 10px;">
+          
+          <!-- Header Block -->
+          <section class="headline-block">
+            <h1 class="main-headline">Settings</h1>
+          </section>
+
+          <!-- Section: MY PLAN -->
+          <h2 class="section-caps-title" style="margin-top: 24px;">MY PLAN</h2>
+
+          <div class="settings-group-card" aria-label="My plan settings">
+            <!-- Row 1: Subjects -->
+            <div class="settings-row tappable" onclick="goToScreen5()">
+              <span class="settings-row-label">Subjects</span>
+              <div class="settings-row-right">
+                <span class="settings-row-value">6 subjects selected</span>
+                <svg class="settings-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Row 2: Preparation Start Date -->
+            <div class="settings-row">
+              <span class="settings-row-label">Preparation Start Date</span>
+              <span class="settings-row-value">11 August 2026</span>
+            </div>
+
+            <!-- Row 3: Preparation End Date -->
+            <div class="settings-row">
+              <span class="settings-row-label">Preparation End Date</span>
+              <span class="settings-row-value">10 August 2027</span>
+            </div>
+          </div>
+
+          <!-- Section: APP -->
+          <h2 class="section-caps-title">APP</h2>
+
+          <div class="settings-group-card" style="margin-bottom: 90px;" aria-label="App settings">
+            <!-- Row 1: Reset Planner -->
+            <div class="settings-row tappable" onclick="confirmResetPlanner()">
+              <span class="settings-row-label danger-label">Reset Planner</span>
+              <div class="settings-row-right">
+                <svg class="settings-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A85A48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Row 2: About UPSC Tracker -->
+            <div class="settings-row tappable" onclick="alert('UPSC Tracker v1.0\n\nA calm, non-surveillance study tracker designed for UPSC Civil Services aspirants to build daily compounding consistency.')">
+              <span class="settings-row-label">About UPSC Tracker</span>
+              <div class="settings-row-right">
+                <svg class="settings-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Row 3: Version 1.0 -->
+            <div class="settings-row">
+              <span class="settings-row-label" style="font-weight: 500; color: var(--color-text-muted);">Version 1.0</span>
+              <span class="settings-row-value" style="font-size: 12px;">MVP Build</span>
+            </div>
+
+            <!-- Row 4: Credits -->
+            <div class="settings-row">
+              <span class="settings-row-label" style="font-weight: 500; color: var(--color-text-muted);">Credits</span>
+              <span class="settings-row-value" style="font-size: 12px; font-weight: 600;">Designed by Zeodux · All Rights Reserved</span>
+            </div>
+          </div>
+
+        </main>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Toggle Viewport Responsive / iPhone Frame
+    function toggleViewportFrame() {
+      const viewport = document.getElementById('deviceViewport');
+      viewport.classList.toggle('full-responsive');
+    }
+
+    // Global Navigation Bar State Manager
+    function updateNavForScreen(num) {
+      const nav = document.getElementById('globalWaterNav');
+      if (!nav) return;
+      
+      // Hide bottom nav bar during onboarding (Screens 1..4)
+      if (num <= 4) {
+        nav.style.display = 'none';
+        return;
+      }
+      
+      nav.style.display = 'flex';
+      
+      const buttons = nav.querySelectorAll('.water-tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      if (num === 7 || num === 8) {
+        buttons[0].classList.add('active'); // Daily Tasks
+      } else if (num === 6 || num === 5) {
+        buttons[1].classList.add('active'); // Subject Plan
+      } else if (num === 9 || num === 10) {
+        buttons[2].classList.add('active'); // Progress Dashboard
+      } else if (num === 11) {
+        buttons[3].classList.add('active'); // Settings
+      }
+    }
+
+    // Onboarding & Setup Screen Switching
+    function showScreen(num) {
+      for (let i = 1; i <= 11; i++) {
+        const view = document.getElementById(`screen${i}View`);
+        if (!view) continue;
+        if (i < num) {
+          view.classList.add('slide-left');
+          view.classList.remove('slide-in');
+        } else if (i === num) {
+          view.classList.remove('slide-left');
+          view.classList.add('slide-in');
+        } else {
+          view.classList.remove('slide-left', 'slide-in');
+        }
+      }
+      updateNavForScreen(num);
+      const select = document.getElementById('screenJumpSelect');
+      if (select) {
+        select.value = num;
+      }
+    }
+
+    function goToScreen1() { showScreen(1); }
+    function goToScreen2() { showScreen(2); }
+    function goToScreen3() { showScreen(3); }
+    function goToScreen4() { showScreen(4); }
+    function goToScreen5() { showScreen(5); }
+    function goToScreen6() { showScreen(6); }
+    function goToScreen7() { showScreen(7); }
+    function goToScreen8() { showScreen(8); }
+    function goToScreen9() { showScreen(9); }
+    function goToScreen10() { showScreen(10); }
+    function goToScreen11() { showScreen(11); }
+
+    function confirmResetPlanner() {
+      if (confirm("Reset Planner?\n\nThis will clear your selected subjects and return to the onboarding setup.")) {
+        goToScreen1();
+      }
+    }
+
+    let activeTaskCard = null;
+
+    function openTaskDetail(subject, topic, duration, isCompleted, element) {
+      activeTaskCard = element;
+      document.getElementById('taskDetailChip').innerText = subject.toUpperCase();
+      document.getElementById('taskDetailTitle').innerText = `${subject} — ${topic}`;
+      document.getElementById('taskDetailDuration').innerText = duration;
+
+      const dot = document.getElementById('taskStatusDot');
+      const text = document.getElementById('taskStatusText');
+      const btn = document.getElementById('taskDetailBtn');
+      const success = document.getElementById('taskSuccessCard');
+
+      if (isCompleted || (element && element.classList.contains('completed'))) {
+        dot.classList.add('completed');
+        text.classList.add('completed');
+        text.innerText = 'Completed';
+        btn.style.display = 'none';
+        success.style.display = 'flex';
+      } else {
+        dot.classList.remove('completed');
+        text.classList.remove('completed');
+        text.innerText = 'Not started';
+        btn.style.display = 'flex';
+        success.style.display = 'none';
+      }
+
+      goToScreen8();
+    }
+
+    function completeTaskDetail() {
+      const dot = document.getElementById('taskStatusDot');
+      const text = document.getElementById('taskStatusText');
+      const btn = document.getElementById('taskDetailBtn');
+      const success = document.getElementById('taskSuccessCard');
+
+      dot.classList.add('completed');
+      text.classList.add('completed');
+      text.innerText = 'Completed';
+
+      btn.style.display = 'none';
+      success.style.display = 'flex';
+
+      if (activeTaskCard && !activeTaskCard.classList.contains('completed')) {
+        toggleTaskCompletion(activeTaskCard);
+      }
+    }
+
+    // Screen 6 Month Selector Handler
+    function selectMonth(monthName, pillElement) {
+      document.querySelectorAll('.month-pill').forEach(pill => pill.classList.remove('selected'));
+      pillElement.classList.add('selected');
+
+      const title = document.getElementById('monthFocusTitle');
+      if (title) {
+        title.innerText = `${monthName} focus`;
+      }
+    }
+
+    // Screen 7 Task Completion Toggle & Live Metric Updates
+    function toggleTaskCompletion(cardElement) {
+      cardElement.classList.toggle('completed');
+
+      const allTasks = document.querySelectorAll('#screen7View .task-card');
+      const completedTasks = document.querySelectorAll('#screen7View .task-card.completed');
+
+      const completedCount = completedTasks.length * 2;
+      const pct = Math.round((completedTasks.length / allTasks.length) * 100);
+
+      document.getElementById('todayTaskRatio').innerText = `${completedCount} / 10`;
+      document.getElementById('todayTaskPct').innerText = `(${pct}%)`;
+      document.getElementById('todayRingText').innerText = `${pct}%`;
+
+      const ringFill = document.getElementById('todayRingFill');
+      if (ringFill) {
+        const offset = 188.5 - (188.5 * pct / 100);
+        ringFill.style.strokeDashoffset = offset;
+      }
+
+      const remainingCount = (allTasks.length - completedTasks.length) * 2;
+      const insightTitle = document.getElementById('todayInsightTitle');
+      if (insightTitle) {
+        if (remainingCount === 0) {
+          insightTitle.innerText = "All tasks completed today! 🎉";
+        } else {
+          insightTitle.innerText = `${remainingCount} tasks left today.`;
+        }
+      }
+    }
+
+
+
+    // Screen 2 Single-Select Logic
+    function selectOption(cardElement) {
+      const allCards = document.querySelectorAll('.option-card');
+      allCards.forEach(card => {
+        card.classList.remove('selected');
+        card.setAttribute('aria-checked', 'false');
+      });
+
+      cardElement.classList.add('selected');
+      cardElement.setAttribute('aria-checked', 'true');
+
+      const continueBtn = document.getElementById('continueBtn');
+      continueBtn.disabled = false;
+    }
+
+    function handleContinue() {
+      goToScreen3();
+    }
+
+    // Screen 3 Dynamic Hour Selector & Calculation Logic
+    function selectHours(hours, pillElement) {
+      document.querySelectorAll('.hour-pill').forEach(pill => pill.classList.remove('selected'));
+      pillElement.classList.add('selected');
+
+      const theoretical = hours * 365;
+      const reality = Math.round(theoretical * 0.75);
+
+      document.getElementById('calcFormula').innerText = `${hours} hours × 365 days`;
+      document.getElementById('heroMetric').innerText = `${theoretical.toLocaleString()} hours`;
+      document.getElementById('realityMetric').innerText = `≈ ${reality.toLocaleString()} hours`;
+    }
+
+    // Screen 5 Subject Multi-Select Logic
+    function toggleSubjectSelection(cardElement) {
+      cardElement.classList.toggle('selected');
+
+      const selectedCount = document.querySelectorAll('.subject-card.selected').length;
+      document.getElementById('subjectCountText').innerText = `${selectedCount} subject${selectedCount === 1 ? '' : 's'} selected`;
+
+      const createPlanBtn = document.getElementById('createPlanBtn');
+      createPlanBtn.disabled = (selectedCount === 0);
+    }
+  </script>
+
+</body>
+</html>
